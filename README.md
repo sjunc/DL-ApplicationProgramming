@@ -149,13 +149,74 @@ GPT (Generative Pretrained Transformer)
 
 |구분 | 유형 | 알고리즘 | 
 |------|---|------|
-|지도학습|분류|K-최근접 이웃(K-Nearest Neighbor. KNN),서포트 벡터 머신(Support Vector Machine.SVM), 결정 트리(Decision tree),로지스틱 회귀 (logistic regression)|
+|지도학습(Supervised learning)|분류|K-최근접 이웃(K-Nearest Neighbor. KNN),서포트 벡터 머신(Support Vector Machine.SVM), 결정 트리(Decision tree),로지스틱 회귀 (logistic regression)|
 |       | 회귀| 선형회귀(Linear Regression)| 
-| 비지도학습|군집|K-평균 군집화 (K-means clustering) 밀도 기반 군집 분석 (DBSCAN) |
+| 비지도학습(Unsupervised learning)|군집|K-평균 군집화 (K-means clustering) 밀도 기반 군집 분석 (DBSCAN) |
 |    | 차원 축소| 주성분 분석|
-|강화학습|  |마르코프 결정 과정(Markov Decision Process, MDP)  |
+|강화학습(Reinforcement learning)| -  |마르코프 결정 과정(Markov Decision Process, MDP)  |
+
+### 사전 지식  
+독립변수와 종속변수  
+독립 변수 X -> 모델 -> 종속변수 Y  
+독립변수(Independent Variable):     
+ - 종속변수에 영향을 주는 변수   
+ - 모델이 입력값으로 사용하는 변수  
+
+종속변수(Dependent Variable):   
+ - 다른 변수(독립변수)에 의해 영향을 받는 변수   
+ - 예측하려는 목표 변수
+
+예시
+ 마케팅 분석  
+- 독립변수: 광고 비용, 프로모션 횟수  
+- 종속변수: 매출액  
+ 부동산 가격 예측  
+- 독립변수: 면적, 방 개수, 위치  
+- 종속변수: 주택 가격  
+ 운동과 체중 감량  
+- 독립변수: 운동 시간, 칼로리 섭취량  
+- 종속변수: 체중 변화  
+   
+관계   
+"독립변수(X)가 변하면 종속변수(Y)도 변한다."    
+수식 예제:   
+Y = aX + b   
+- X: 독립변수     
+- Y: 종속변수   
+- a, b: 계수 a-기울기 b-절편   
+   
+평균(Mean, Average)과 분산(Variance)  
+평균 (Mean)중앙값(Median)과 다름  
+- 데이터 값들의 대표적인 중심값  
+- 값을 모두 더한 후 개수로 나눈 값  
+예시  
+- 시험 점수: 70, 80, 90의 평균  
+- (70 + 80 + 90) ÷ 3 = 80   
+- 월간 판매량: (100, 120, 140) → 평균: 120개   
+분산 (Variance)  
+- 데이터가 평균을 기준으로 얼마나 퍼져 있는지 나타내는 값  
+- 값이 클수록 데이터가 분산되어(흩어져) 있음  
+핵심 요약  
+평균: 데이터의 중심값  
+분산: 데이터가 퍼진 정도  
+ 평균이 같아도 분산이 다를 수 있음!  
+예:  
+- (78, 80, 82) 평균 = 80, 분산 작음   
+- (60, 80, 100) 평균 = 80, 분산 큼   
+   
+### 딥러닝 문제해결 과정  
+
+1. 해결할 문제 정의 -> 2.데이터 수집 -> 3. 데이터 가공(데이터 전처리) -> 4. 딥러닝 모델 설계(모델구조 구현) 5. 딥러닝 모델 학습 -> 6. 성능 평가  
 
 
 
 
-  
+
+
+
+
+
+
+
+
+----
