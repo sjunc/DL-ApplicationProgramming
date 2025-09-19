@@ -7,8 +7,8 @@
 머신러닝 EX.인공신경망(ANN), SVM, DecisionTree  
   |  
 딥러닝 EX.CNN(Convolutional Neural Network, RNN(Recurrent Neural Network), RBM(Restricted Boltzmann Machine)    
-  
-### 인공지능(AI, Artificial Intelligence)  
+
+## 2주차 인공지능(AI, Artificial Intelligence)  
  정의  
 - 인간의 지능적인 작업을 컴퓨터 시스템이 수행하도록 하는 기술과 학문 분야  
 - 문제 해결, 추론, 학습, 자연어 처리, 로봇 제어 등이 포함됨  
@@ -207,6 +207,86 @@ Y = aX + b
 ### 딥러닝 문제해결 과정  
 
 1. 해결할 문제 정의 -> 2.데이터 수집 -> 3. 데이터 가공(데이터 전처리) -> 4. 딥러닝 모델 설계(모델구조 구현) 5. 딥러닝 모델 학습 -> 6. 성능 평가  
+
+----
+## 3주차 텐서플로 기초
+### 벡터, 행렬, 텐서
+• 인공지능(머신 러닝/딥러닝)에서 데이터는 벡터(vector)로 표현  
+• 벡터는 [1.0, 1.1, 1.2]처럼 숫자들의 리스트로, 1차원 배열 형태  
+• 행렬(matrix)은 행과 열로 표현되는 2차원 배열 형태  
+• 텐서는 3차원 이상의 배열 형태  
+  
+#### 텐서플로(tensorflow)
+데이터 흐름 그래프(data flow graph)를 사용하여 데이터의 수치 연산을 하는 오픈 소스 소프트웨어 프레임워크  
+텐서플로에서 데이터의 수치 연산을 수행하기 위한 그래프   
+그림과 같이 그래프의 노드(node)는 수학적 연산을 처리하고, 에지(edge)는 노드 사이의 관계를 표현하며, 데이터(텐서(tensor)) 이동을 수행   
+  
+텐서플로 아키텍처  
+• 준비된 데이터를 사용하여 모델(모형)을 생성하고 저장할 수 있음  
+• 생성된 모델을 사용하여 분류 및 예측으로 마무리할 수도 있지만, 텐서플로 허브(TensorFlow Hub)에 게시하여 재사용할 수도 있음 또한, 사용자에게 웹이나 모바일로 서비스를 배포할 수 있는 환경도 제공됨  
+  
+모델(모형)생성 -> 모델(모형) 저장 -> 모델(모형) 배포   
+  
+모델(모형) 생성:  
+• 데이터 훈련을 위한 데이터셋과 모델을 생성하고 훈련할 수 있는 환경을 제공함  
+• 모델의 학습 과정을 시각화하여 보여 줄 수 있는 텐서보드 같은 도구들을 제공  
+• 모델(모형) 저장:  
+• 텐서플로는 분산 환경에서 모델을 저장하고 배포할 수 있는 환경을 제공  
+• 특히 웹이나 모바일 같은 다양한 환경에서 사용 가능하도록 호환성이 고려된 모델 저장소를 제공  
+• 모델(모형) 배포:  
+• 서버나 웹 환경에서 텐서플로를 사용하면 언어 및 플랫폼에 상관없이 모델을 쉽게 학습시키고 배포할 수 있음  
+• 텐서플로 2.x에서는 포맷을 표준화하기 때문에 플랫폼과 컴포넌트 간 호환성도 확보할 수 있음  
+텐서보드: epoch에 따른 accuracy 정확도 를 정리해준 표를 제공해줌.  
+
+### 텐서플로의 주요 문법 model.complie() model.fit() model.evaluate() model.predict() 
+모델 컴파일(model.compile) 과정에서의 주요 파라미터  
+모델을 훈련하기 전에 필요한 파라미터들을 정의함  
+주요 파라미터는 optimizer, loss function, metrics임.  
+- 옵티마이저(optimizer): 데이터와 손실 함수를 바탕으로 모델의 업데이트 방법을 결정함(Adam, Nadam....)  
+- 손실 함수(loss function): 훈련하는 동안 출력과 실제 값(정답) 사이의 오차를 측정함   
+wx+b를 계산한 값(모델의 예측)과 y(정답)의 오차를 구해서 모델 정확성을 측정함 (예) MSE 등   
+- 지표(metrics): 훈련과 검증 단계를 모니터링하여 모델의 성능을 측정(Accuracy[ 0 ~ 1 ]...)  
+  
+model.compile(optimizer='adam', loss = 'sparse_categorical_crossentropy', metrics = ['accuracy'])  
+ⓐ 아담(Adam) 옵티마이저를 사용  
+ⓑ sparse_categorical_crossentropy는 다중 분류에서 사용되는 손실 함수  
+ⓒ 'accuracy'는 훈련에 대한 정확도를 나타내는 것으로, 값이 1에 가까울수록 좋은 모델  
+   
+모델 훈련(model.fit) 과정  
+• 앞서 만들어 둔 데이터로 모형을 학습(학습용/검증용 데이터)   
+• 학습을 시킨다는 것은 y=wx+b라는 매핑 함수에서 w와 b의 적절한 값을 찾는다는 의미   
+• w와 b에 임의의 값을 적용하여 시작하며, 모델에 데이터를 입력하면서 오차를 구하게 됨   
+• 이때 오차가 줄어드는 방향으로 파라미터를 수정  
+
+model.fit(x_train, y_train, epochs=10, batch_size=100, validation_data=(x_test, y_test), verbose =2)  
+ⓐ 입력 데이터  
+ⓑ 정답(label) 데이터  
+ⓒ 학습 데이터를 학습하는 횟수  
+ⓓ 한 번에 학습하는 데이터의 개수  
+ⓔ 검증 데이터(validation data)  
+각 epoch마다 검증 데이터의 정확도도 함께 출력하게 할 수 있음. epoch 마다 validation으로 평가  
+검증 데이터로 확인된 정확도는 훈련이 잘 되고 있는지 보여주는 지표로 사용할 수 있으며, 검증 데이터를 모델이 보면서 학습하지는 않음  
+ⓕ verbose 학습 진행 상황을 보여 줄지 옵션을 지정함  
+    
+모델 평가(model.evaluate) 과정  
+• 주어진 검증 데이터셋을 사용하여 모델을 평가함   
+• 평가가 끝나면 검증 데이터셋에 대한 손실 값과 정확도가 결과로 표시됨   
+    
+model.evaluate(x_test, y_test, batch_size=32)  
+ⓐ 검증 데이터셋  
+ⓑ 결과(label) 데이터셋  
+ⓒ 한 번에 학습할 때 사용하는 데이터 개수  
+
+모델 사용(model.predict) 과정  
+• 훈련된 모델을 사용하여 다음 예시 코드처럼 실제 예측을 진행함  
+model.predict(y_test)  
+
+### 환경세팅
+anaconda prompt 가상환경 dl 생성  
+conda create -n dl  
+conda activate dl   
+pip install tensorflow  
+
 
 
 
