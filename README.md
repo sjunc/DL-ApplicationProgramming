@@ -1460,39 +1460,133 @@ r-cnn은 (resizing warping) 을 거치고 연결이지만
 “SPP 구조 흐름도 (Conv → SPP → FC)”   
 공간 피라미드 풀링을 적용한 것은 R-CNN이 아닌, SPP-Net임   
 
+#### Fast R-CNN
+R-CNN은 바운딩 박스마다 CNN을 돌리고, 분류를 위한 긴 학습 시간이 문제였음   
+Fast R-CNN(Fast Region-based CNN)은 R-CNN의 속도 문제를 개선하려고 RoI 풀링을 도입  
+(idea) "이미지를 CNN에 한 번만 넣고, 그 결과인 feature map 위에서 여러 ROI를 처리하자"  
+  
+Fast R-CNN의 전체 흐름  
+  
+1. 입력 이미지를 CNN에 한 번만 통과시켜 feature map을 생성한다.  
+2. 원본 이미지에서 Selective Search로 후보영역(ROI)을 여러 개 만든다.  
+3. 각 ROI의 위치를 feature map 좌표로 변환한다.  
+4. ROI가 차지하는 feature map 부분을 잘라내어 RoI Pooling을 적용한다.  
+- RoI Pooling은 ROI 영역을 7×7과 같은 고정된 구획으로 나누고, 각 구획에서 Max Pooling을 수행해 ROI마다 일정 크기의 특징(예: 7×7×채널 수)을 얻는 과정이다.   
+5. RoI Pooling의 출력은 완전연결층(FC Layer)에 들어가 분류와 박스 위치 보정을 동시에 수행한다.    
+6. 여러 ROI에서 나온 중복 박스를 NMS(Non-Maximum Suppression)로 정리하여 최종 탐지 결과를 만든다.  
+  
+RoI 풀링  
+RoI 풀링(RoI pooling)은 크기가 다른 특성 맵의 영역마다 스트라이드를 다르게 최대 풀링을 적용하여 결괏값 크기를 동일하게 맞추는 방법   
+예를 들어 다음 그림과 같이 박스 한 개가 픽셀 한 개를 뜻하는 특성 맵이 있다고 하자  
+즉, 8×8 특성 맵(❶)에서 선택적 탐색으로 뽑아냈던 7×5 후보 영역(❷)이 있으며, 이것을 2×2로 만들기 위해 스트라이드(7/2=3, 5/2=2)로 풀링 영역(❸)을 정하고 최대 풀링을 적용하면 2×2 결과(❹)를 얻을 수 있음   
 
+RPN (RoI Pooling Network)   
+Faster R-CNN은 ‘더욱 빠른’ 객체 인식을 수행하기 위한 네트워크  
+기존 Fast R-CNN 속도의 걸림돌이었던 후보 영역 생성을 CNN 내부네트워크에서 진행할 수 있도록 설계  
+즉, Faster R-CNN은 기존 Fast R-CNN에 후보 영역 추출 네트워크(RegionProposal Network, RPN)를 추가한 것이 핵심이라고 할 수 있음  
+Faster R-CNN에서는 외부의 느린 선택적 탐색(CPU로 계산) 대신 내부의빠른 RPN(GPU로 계산)을 사용  
+RPN은 다음 그림과 같이 마지막 합성곱층 다음에 위치  
+그 뒤에 Fast R-CNN과 마찬가지로 RoI 풀링과 분류기(classifier), 바운딩박스 회귀(bounding-box regression)가 위치  
+RPN(후보 영역 추출 네트워크)은 feature map 전체를 훑으며 후보 영역을 뽑아내는 역할을 함   
+#### spp-net 
+RPN이 뽑은 수천개의 바운딩 박스 중, NMS(Non Maximum Suppression)을 통해 겹치고 불필요한 부분을 제거함이후 RoI Pooling으로 고정된 크기의 특징을 뽑아내고, 완전연결층에 입력하여 클래스 분류 등을 하여 객체를 인식함   
+    
+RPN(후보 영역 추출 네트워크)는 이미지에 존재하는 객체들의 크기와 비율이 다양하기 때문에 고정된 N×N 크기의 입력만으로 다양한 크기와 비율의 이미지를 수용하기 어려운 단점이 있음  
+이러한 단점을 보완하기 위해 여러 크기와 비율의 레퍼런스 박스(reference box) k개를 미리 정의하고 각각의 슬라이딩 윈도우 위치마다 박스 k개를 출력하도록 설계하는데, 이 방식을 앵커(anchor)라고 함  
 
+### 이미지 분할(image segmentation)  
+이미지 분할은 신경망을 훈련시켜 이미지를 픽셀 단위로 분할하는 것   
+즉, 이미지를 픽셀 단위로 분할하여 이미지에 포함된 객체를 추출함  
+주요 네트워크  
+FCN(Fully Convolutional Network, 완전 합성곱 네트워크)  
+Convolutional & Deconvolutional Network(합성곱 & 역합성곱 네트워크)  
+U-Net   
+PSPNet   
+DeepLabv3 / DeepLabv3+  
+#### FCN(완전 합성곱 네트워크)  
+완전연결층의 한계는 고정된 크기의 입력만 받아들이며, 완전연결층을 거친 후에는 위치 정보가 사라진다는 것  
+이러한 문제를 해결하기 위해 완전연결층을 1×1 합성곱으로 대체하는 것이 완전 합성곱 네트워크  
+완전연결층을 1*1합성곱으로 대체하면 공간 정보(높이*너비)가 보존됨  
+출력 형태는 h*w 크기의 feature map들  
+즉, 완전 합성곱 네트워크(Fully Convolutional Network, FCN)는 이미지 분류에서 우수한 성능을 보인 CNN 기반 모델(AlexNet, VGG16, GoogLeNet)을 변형시켜 이미지 분할에 적합하도록 만든 네트워크  
+기존 CNN은 완전연결층때문에 이미지 크기를 제약했어야 했다면 완전 합성곱 네트워크에서는 모든 연산이 Convolution과 Pooling으로만되어 있기 때문에, 입력이 어느 크기든 모델에 입력되어 흘러가여 feature map을 생성할 수 있음  
+(참고) Conv와 Pool은 입력의 크기를 강제로 고정하고 있지 않음  
+완전 합성곱 네트워크는 위치 정보가 보존된다는 장점에도 다음과 같은 단점이 있음  
+- 여러 단계의 합성곱층과 풀링층을 거치면서 해상도가 낮아짐  
+- 낮아진 해상도를 복원하기 위해 단순한 업샘플링 방식을 사용하기 때문에 이미지의 세부정보들을 잃어버리는 문제가 발생함. -> 이미지의 세밀한 경계 복원이 어려움  
+이러한 문제를 해결하기 위해 역합성곱 네트워크를 도입한 것이 합성곱 & 역합성곱 네트워크(convolutional & deconvolutional network)   
+역합성곱(Deconvolution)은 CNN의 최종 출력 결과를 원래의 입력 이미지와 같은 크기를 만들고 싶을 때 사용  
+시멘틱 분할(semantic segmentation) 문제 등에 활용할 수 있으며, Deconvolution은 업샘플링 방식의 일종임  
+이미지 크기를 다시 늘리면서, 동시에 확대된 곳에 디테일을 그려넣는 방식이라고 볼 수 있음.  
+Deconvolution에서 사용하는 필터(커널)도 학습이 가능한 형태임.  
+즉, 역합성곱 커널은 이미지의 업샘플링을 잘 하도록 학습되는 것  
 
+CNN에서 합성곱층은 합성곱을 사용하여 특성 맵 크기를 줄임  
+역합성곱은 이와 반대로 특성 맵 크기를 증가시키는 방식으로 동작  
+역합성곱은 다음 방식으로 동작  
+1. 각각의 픽셀 주위에 제로 패딩(zero-padding)을 추가  
+2. 이렇게 패딩된 것에 합성곱 연산을 수행  
 
+#### U-Net 
+U-Net은 바이오 메디컬 이미지 분할을 위한 합성곱 신경망   
+U-Net은 기존 슬라이딩 윈도우 방식의 CNN보다 속도가 빠르다는 장점이 있음  
+U-Net은 트레이드오프(trade-off)에 빠지지 않는다는 특징이 있음
+- 트레이드오프(trade-off) 비용과 결과의 상충관계    
+일반적으로 패치 크기가 커진다면 넓은 범위의 이미지를 인식하는 데 뛰어나기 때문에 컨텍스트(context) 인식에 탁월한 반면,
+지역화(Localization)에는 한계가 있었음
+U-Net은 컨텍스트 인식과 지역화를 모두 잘 함  
+U-Net은 FCN(Fully Convolutional Network)을 기반으로 구축되었으며, 수축 경로(contracting path)와 확장 경로(expansive path), Skip Connection으로 구성되어 있음  
+Contracting Path/Downsampling Path/Encoder   
+이미지에서 의미 정보를 추출하는 일반적인 CNN 구조  
+해상도는 점점 낮아지고, 특징을 추출해내는 역할을 함  
+Expansive Path/Upsampling Path/Decoder  
+줄어든 해상도를 다시 키우면서 segmentation mask를 복원함  
+해상도가 점점 올라가며, 정교한 형태로 복원됨  
+즉, 정확한 지역화(Localization)를 수행함  
+Skip Connection  
+Encoder의 중간 과정에서 나오는 feature map을 Decoder와 같은 수준의 해상도 지점에 그대로 복사하여 붙여줌  
+그래서 기존의 이미지에서 지역적인 정보를 잃지 않고 더 정교하게 segmentation 가능  
+#### PSPNet  
+PSPNet(Pyramid Scene Parsing Network)은 CVPR(The IEEE Conference on Computer Vision and Pattern Recognition) 2017에서 발표된 시멘틱 분할 알고리즘   
+PSPNet은 이미지 전체를 큰 그림부터 작은 부분까지 다양한 크기의 시야(receptive field)로 바라보고, 그 정보를 합쳐 더 정확한 세그멘테이션(분할)을 수행하는 모델   
+기존 모델은은 feature map만 보고 주변의 작은 패턴만 분석하므로, 장면 전체의 의미를 파악하는 능력이 부족하였음. 이런 한계를 극복하기 위해 피라미드 풀링 모듈(PPM)을 추가했음.   
+지역화(localization)는  이미지 안에 객체 위치 정보를 출력해 주는 것으로, 주로 바운딩 박스를 많이 활용함  
 
+Pyramid Pooling Module(PSP Module)   
+핵심 아이디어: Feature map을 여러 크기로 요약(pooling)하여 큰 그림(전역 정보)부터 작은 영역(지역 정보)까지 모두 확보한 뒤, 다시 합치겠다.  
+1. 이미지 출력이 서로 다른 크기가 되도록 여러 차례 풀링을 함  
+-즉, 1×1, 2×2, 3×3, 6×6 크기로 풀링을 수행하는데, 이때 1×1 크기의 특성 맵은 가장 광범위한 정보를 담음   
+-각각 다른 크기의 특성 맵은 각각 다른 수준에서 이미지를 바라보며 요약하는 것이라 이해하면 됨   
+2. 이후 1×1 합성곱을 사용하여 채널 개수를 조정함   
+3. 이후 모듈의 입력 크기에 맞게 특성 맵을 업 샘플링  
+-이 과정에서 양선형 보간법(bilinear interpolation)이 사용됨  
+4. 원래의 특성 맵과 1~3 과정에서 생성한 새로운 특성 맵들을 병합함  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 구조  
+Input  
+↓  
+Backbone CNN (ResNet50/101)  
+↓  
+Final Feature Map (ex: 60×60)  
+↓   
+[Pyramid Pooling Module]  
+- 1×1 pooling → upsample  
+- 2×2 pooling → upsample  
+- 3×3 pooling → upsample   
+- 6×6 pooling → upsample   
+→ 모두 concat   
+↓   
+Segmentation Head (Conv)   
+↓  
+Upsampling  
+↓  
+Final Segmentation Map  
+  
+segmentation head(conv)가 출력 채널 수를 클래스 수로 맞춰주는 층이라고 보면 됨.  
+예: 사람, 도로, 자동차, 나무 -> 4개의 픽셀로 나타내고, 가장 확률이 높은 쪽으로 픽셀을 그 채널로 할당함   
+예:   
+첫번째 픽셀: [0.1, 0.8, 0.05, 0.05 ] -> "도로"  
+5123번째 픽셀: [0.9, 0.03, 0.02, 0.05] -> "사람"  
 
 
 
